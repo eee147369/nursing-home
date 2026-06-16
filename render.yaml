@@ -13,7 +13,8 @@ services:
     # 构建命令（相对于 rootDir）
     buildCommand: |
       npm install
-      cd client && npm install && npm run build
+      cd server && npm install
+      cd ../client && npm install && npm run build
 
     # 启动命令（相对于 rootDir）
     startCommand: npm start
