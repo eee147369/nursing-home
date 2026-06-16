@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const autoInit = require('./auto-init');
 
 const dashboardRoutes = require('./routes/dashboard');
 const adminRoutes = require('./routes/admin');
@@ -34,3 +35,8 @@ if (process.env.NODE_ENV === 'production') {
 app.listen(PORT, () => {
   console.log(`服务器已启动: http://localhost:${PORT}`);
 });
+
+// 自动初始化数据库（生产环境，表不存在时创建）
+if (process.env.NODE_ENV === 'production') {
+  autoInit();
+}
