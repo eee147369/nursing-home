@@ -10,33 +10,43 @@ const relativeRoutes = require('./routes/relatives');
 const orderRoutes = require('./routes/orders');
 const projectRoutes = require('./routes/projects');
 
-const app = express();
-const PORT = process.env.PORT || 3001;
+async function main() {
+  // 生产环境：先初始化数据库，再启动服务器
+  if (process.env.NODE_ENV === 'production') {
+    console.log('[启动] 正在初始化数据库...');
+    try {
+      await autoInit();
+      console.log('[启动] 数据库初始化完成');
+    } catch (err) {
+      console.error('[启动] 数据库初始化失败:', err.message);
+    }
+  }
 
-app.use(cors());
-app.use(express.json());
+  const app = express();
+  const PORT = process.env.PORT || 3001;
 
-// API routes
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/admins', adminRoutes);
-app.use('/api/nurses', nurseRoutes);
-app.use('/api/relatives', relativeRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/projects', projectRoutes);
+  app.use(cors());
+  app.use(express.json());
 
-// Serve static files in production
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/dist')));
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+  // API routes
+  app.use('/api/dashboard', dashboardRoutes);
+  app.use('/api/admins', adminRoutes);
+  app.use('/api/nurses', nurseRoutes);
+  app.use('/api/relatives', relativeRoutes);
+  app.use('/api/orders', orderRoutes);
+  app.use('/api/projects', projectRoutes);
+
+  // Serve static files in production
+  if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, '../client/dist')));
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+    });
+  }
+
+  app.listen(PORT, () => {
+    console.log(`服务器已启动: http://localhost:${PORT}`);
   });
 }
 
-app.listen(PORT, () => {
-  console.log(`服务器已启动: http://localhost:${PORT}`);
-});
-
-// 自动初始化数据库（生产环境，表不存在时创建）
-if (process.env.NODE_ENV === 'production') {
-  autoInit();
-}
+main();
