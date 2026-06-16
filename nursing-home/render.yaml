@@ -1,0 +1,41 @@
+# Render Blueprint 配置文件
+# 文档: https://render.com/docs/blueprint-spec
+# 使用方式：
+#   1. 将此文件推送到 GitHub 仓库
+#   2. 在 Render Dashboard 选择 "Blueprint" 部署方式
+#   3. 连接仓库后会自动创建 PostgreSQL 数据库 + Web 服务
+
+services:
+  # ============ Web 服务 ============
+  - type: web
+    name: nursing-home
+    env: node
+    region: singapore  # 新加坡节点，国内访问较快
+    plan: free         # 免费计划（每月 750 小时免费额度）
+
+    # 构建命令
+    buildCommand: |
+      npm install
+      cd client && npm install && npm run build
+
+    # 启动命令
+    startCommand: npm start
+
+    # 健康检查路径
+    healthCheckPath: /api/dashboard/stats
+
+    # 环境变量
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # DATABASE_URL 由下方的 PostgreSQL 服务自动注入
+      # 无需手动设置
+
+databases:
+  # ============ PostgreSQL 数据库 ============
+  - name: nursing-home-db
+    region: singapore
+    plan: free         # 免费计划（100MB 存储，够用）
+    databaseName: nursing_home
+    ipAllowList: []    # 仅允许 Render 内部网络访问
+    # postgresMajorVersion: 16
